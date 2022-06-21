@@ -1,5 +1,6 @@
 import re
 from datetime import datetime as dt
+from typing import NamedTuple
 
 
 def datetime(text):
@@ -33,7 +34,7 @@ def header(line):
 
     match = HEADER_RE.fullmatch(line)
     if not match:
-        raise ValueError("Invalid header format")
+        raise ValueError(f"Invalid header format: {line}")
 
     saved_at, playback_pos, playlist_pos = HEADER_RE.fullmatch(line).groups()
 
@@ -44,24 +45,53 @@ def header(line):
     return saved_at, playback_pos, playlist_pos
 
 
-# def _is_header(line):
-#     """check if a line of text is a header line"""
+def should_be_header(line):
+    """check if a line of text should be a header line (i.e. line has no indentation)"""
 
-#     if len(text.strip()) == 0:
-#         return False
+    if len(line.strip()) == 0:
+        return False
 
-#     if text.startswith(" "):
-#         return False
+    if line.startswith(" "):
+        return False
 
-#     return True
+    return True
 
-# def _parse_video_section(cls, section):
-#     """parse an entire video section"""
 
-#     # parse the header
-#     ostime, playtime, idx = cls._parse_header(lines[0])
+class PlayerInfo(NamedTuple):
+    saved_at: dt
+    playback_pos: int
+    playlist_idx: int
+    playlist: list[str]
 
-#     # parse the rest of the lines
-#     items = [x.strip() for x in lines[1:]]
-#     original_text = "\n".join(lines)
-#     return cls(ostime, playtime, idx, items, original_text)
+    def validate(self):
+        if 0 <= self.playlist_idx < len(self.playlist):
+            return
+
+        raise IndexError(
+            f"Playlist has {len(self.playlist)} items, but playlist index is {self.playlist_idx}."
+        )
+
+
+def players(lines: list[str]) -> list[PlayerInfo]:
+    """parse text containing definitions of players, i.e. a session file"""
+
+    if isinstance(lines, str):
+        lines = lines.splitlines()
+
+    all_players = []
+
+    for l in lines:
+        if len(l.strip()) == 0:
+            continue
+
+        if should_be_header(l):
+            saved_at, playback_pos, playlist_idx = header(l)
+            p = PlayerInfo(saved_at, playback_pos, playlist_idx, [])
+            all_players.append(p)
+        else:
+            if len(all_players) == 0:
+                raise IndentationError("A non-header line is found before any headers")
+
+            all_players[-1].playlist.append(l.strip())
+
+    return all_players
