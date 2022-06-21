@@ -2,12 +2,13 @@ import re
 from datetime import datetime as dt
 from typing import NamedTuple
 
+DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
+
 
 def datetime(text):
     """parse a datetime in this format: 2022-05-30 00:31:13"""
 
-    time_format = "%Y-%m-%d %H:%M:%S"
-    return dt.strptime(text, time_format)
+    return dt.strptime(text, DATETIME_FORMAT)
 
 
 def playback_time(text):
