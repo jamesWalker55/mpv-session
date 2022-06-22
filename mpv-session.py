@@ -1,20 +1,54 @@
-from calendar import month
 import lib.session as session
-import lib.parse as parse
-import lib.serialize as serialize
 import lib.run as run
-from datetime import timedelta
-
-SESSIONS_PATH = R"C:\Users\James\scoop\persist\mpv\portable_config\session.txt"
+from lib.config import Config
 
 MAXIMUM_SESSIONS_COUNT = 30
 
+config = Config("config.json")
+
+
+def get_sessions_path():
+    try:
+        assert isinstance(config.data, dict)
+        path = config.data["sessions-path"]
+        assert isinstance(path, str)
+        return path
+    except:
+        return None
+
+
+def set_sessions_path(path):
+    if not isinstance(config.data, dict):
+        config.data = {}
+
+    config.data["sessions-path"] = str(path)
+    config.save()
+
 
 def main():
-    with open(SESSIONS_PATH, "r", encoding="utf8") as f:
+    sessions_path = get_sessions_path()
+
+    if sessions_path is None:
+        print("No session file configured.")
+        print("Please enter the path of the file you want to load sessions from:")
+
+        while True:
+            sessions_path = input("  > ")
+
+            if len(sessions_path.strip()) == 0:
+                print("Please enter a path.")
+                continue
+
+            break
+
+        set_sessions_path(sessions_path)
+
+        print(f"Settings saved to: {config.get_config_path()}")
+
+    with open(sessions_path, "r", encoding="utf8") as f:
         sessions = session.load(f)
 
-    print(f"{len(sessions)} sessions loaded from {SESSIONS_PATH}.")
+    print(f"{len(sessions)} sessions loaded from {sessions_path}.")
 
     # only get the last 30 sessions
     sessions = sessions[-MAXIMUM_SESSIONS_COUNT:]
@@ -30,7 +64,7 @@ def main():
     for player in last_session:
         run.mpv(player.playlist, player.playlist_idx, player.playback_pos)
 
-    with open(SESSIONS_PATH, "w", encoding="utf8") as f:
+    with open(sessions_path, "w", encoding="utf8") as f:
         session.save(f, sessions)
 
 
