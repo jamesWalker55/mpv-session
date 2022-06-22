@@ -73,7 +73,7 @@ class PlayerInfo(NamedTuple):
         )
 
 
-def players(lines: list[str]) -> list[PlayerInfo]:
+def players(lines: str | list[str]) -> list[PlayerInfo]:
     """parse text containing definitions of players, i.e. a session file"""
 
     if isinstance(lines, str):
