@@ -18,4 +18,4 @@ def mpv(playlist_items, playlist_start, playback_pos):
         f"--script-opts=initial-seek={playback_pos}",
     ]
 
-    return subprocess.Popen(args, creationflags=subprocess.DETACHED_PROCESS)
+    return subprocess.Popen(args, creationflags=subprocess.CREATE_NO_WINDOW)
