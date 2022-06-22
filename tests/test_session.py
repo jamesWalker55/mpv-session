@@ -96,6 +96,11 @@ def describe_from_players():
             a, b = r
             assert s == players[a:b]
 
+    def creates_no_sessions_from_empty_list():
+        ss = session.from_players([])
+
+        assert len(ss) == 0
+
 
 def describe_to_players():
     @pytest.mark.parametrize(
@@ -110,3 +115,8 @@ def describe_to_players():
         new_players = session.to_players(session.from_players(players))
 
         assert players == new_players
+
+    def accepts_empty_list():
+        players = session.to_players([])
+
+        assert len(players) == 0

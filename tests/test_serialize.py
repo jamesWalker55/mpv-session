@@ -15,6 +15,10 @@ def describe_seconds():
         time = 5
         assert serialize.seconds(time) == "0:00:05"
 
+    def serializes_zero_seconds():
+        time = 0
+        assert serialize.seconds(time) == "0:00:00"
+
     def serializes_minutes():
         time = 4 * 60 + 53
         assert serialize.seconds(time) == "0:04:53"
@@ -139,3 +143,7 @@ def describe_players():
 
         text = "\n".join((a_text, long_text, b_text))
         assert serialize.players((a_player, long_player, b_player)) == text
+
+    def serializes_empty_list():
+        text = ""
+        assert serialize.players([]) == text

@@ -3,15 +3,6 @@ import lib.parse as parse
 from datetime import datetime as dt
 
 
-def assert_date_equals(date, year, month, day, hour, minute, second):
-    assert date.year == year
-    assert date.month == month
-    assert date.day == day
-    assert date.hour == hour
-    assert date.minute == minute
-    assert date.second == second
-
-
 def describe_datetime():
     def parses_correct_date():
         text = "2022-05-30 00:31:13"
@@ -90,8 +81,6 @@ def describe_header():
         with pytest.raises(ValueError):
             parse.header(text)
 
-        # text = "[2022-05-29 19:37:37] Pos=0:00:06, Idx=1"
-
     def does_not_parse_invalid_date():
         text = "[hello] Pos=0:00:06, Idx=1"
 
@@ -155,7 +144,7 @@ def describe_players():
             "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
         ]
 
-    def parses_single_video_session():
+    def parses_single_player():
         text = (
             "[2022-05-30 00:31:13] Pos=2:53:42, Idx=1\n"
             "  D:\\Resources\\test stream.mp4\n"
@@ -170,7 +159,7 @@ def describe_players():
         assert p.playlist_idx == 1
         assert p.playlist == [R"D:\Resources\test stream.mp4"]
 
-    def parses_single_video_session():
+    def parses_three_players():
         text = (
             "[2022-06-07 15:35:49] Pos=1:43:27, Idx=8\n"
             "  D:\\Videos\\One.mp4\n"
@@ -248,3 +237,10 @@ def describe_players():
 
         with pytest.raises(IndentationError):
             parse.players(text)
+
+    def parses_empty_text():
+        text = ""
+
+        players = parse.players(text)
+
+        assert len(players) == 0
