@@ -1,11 +1,13 @@
 from lib.parse import PlayerInfo
+import lib.parse as parse
+import lib.serialize as serialize
 from datetime import timedelta as delta
 
 # maximum time gap between videos saved in the same session
 SESSION_MAX_GAP = delta(minutes=2)
 
 
-def from_players(players: list[PlayerInfo]):
+def from_players(players: list[PlayerInfo]) -> list[list[PlayerInfo]]:
     players = players.copy()
     players.sort(key=lambda p: p.saved_at)
 
@@ -32,3 +34,18 @@ def from_players(players: list[PlayerInfo]):
 
 def to_players(sessions):
     return [player for session in sessions for player in session]
+
+
+def load(f):
+    players = parse.players(f.read())
+    return from_players(players)
+
+
+def save(f, sessions):
+    players = to_players(sessions)
+    text = serialize.players(players)
+
+    f.write(text)
+
+    if len(text) != 0:
+        f.write("\n")

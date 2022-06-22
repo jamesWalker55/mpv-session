@@ -1,3 +1,4 @@
+from io import StringIO
 import lib.session as session
 from lib.parse import PlayerInfo
 from datetime import datetime as dt
@@ -120,3 +121,61 @@ def describe_to_players():
         players = session.to_players([])
 
         assert len(players) == 0
+
+
+@pytest.fixture
+def typical_fd():
+    f = StringIO(
+        "[2022-05-29 19:37:37] Pos=0:00:06, Idx=1\n"
+        "  D:/Videos/cool.mp4\n"
+        "  https://www.youtube.com/watch?v=dQw4w9WgXcQ\n"
+        "[2022-05-29 19:38:01] Pos=0:00:24, Idx=2\n"
+        "  D:/Videos/cool.mp4\n"
+        "  https://www.youtube.com/watch?v=dQw4w9WgXcQ\n"
+    )
+    yield f
+    f.close()
+
+
+@pytest.fixture
+def empty_fd():
+    f = StringIO("")
+    yield f
+    f.close()
+
+
+def describe_load():
+    def loads_empty_file(empty_fd):
+        s = session.load(empty_fd)
+        assert len(s) == 0
+
+    def loads_typical_session(typical_fd):
+        s = session.load(typical_fd)
+        assert len(s) == 1
+
+
+def describe_save():
+    def saves_empty_session(empty_fd):
+        session.save(empty_fd, [])
+
+        empty_fd.seek(0)
+        text = empty_fd.read()
+        assert text == ""
+
+    def saves_typical_session(typical_fd):
+        s = session.load(typical_fd)
+
+        typical_fd.seek(0)
+
+        session.save(typical_fd, s)
+
+        typical_fd.seek(0)
+        text = typical_fd.read()
+        assert text == (
+            "[2022-05-29 19:37:37] Pos=0:00:06, Idx=1\n"
+            "  D:/Videos/cool.mp4\n"
+            "  https://www.youtube.com/watch?v=dQw4w9WgXcQ\n"
+            "[2022-05-29 19:38:01] Pos=0:00:24, Idx=2\n"
+            "  D:/Videos/cool.mp4\n"
+            "  https://www.youtube.com/watch?v=dQw4w9WgXcQ\n"
+        )
