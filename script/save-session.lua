@@ -26,11 +26,12 @@ local function write_to_path(path, text)
   return true
 end
 
+-- get the paths of the videos in the playlist
 local function get_playlist_paths()
   local count = tonumber(mp.get_property("playlist-count"))
   local paths = {}
 
-  for i=1,count do
+  for i = 1, count do
     paths[i] = mp.get_property("playlist/" .. i - 1 .. "/filename")
   end
 
@@ -43,11 +44,11 @@ local function get_playlist_idx()
   return tonumber(mp.get_property("playlist-playing-pos")) + 1
 end
 
-local function get_os_time()
+local function get_datetime()
   return os.date('%Y-%m-%d %X')
 end
 
-local function get_play_time_int()
+local function get_playback_time()
   local seconds = mp.get_property("time-pos")
   if seconds == nil then return end
 
@@ -61,7 +62,7 @@ local function get_play_time_int()
 end
 
 local function get_play_time()
-  local h, m, s = get_play_time_int()
+  local h, m, s = get_playback_time()
   if h == nil then
     return nil, "Can't get current playback time, is the video loaded?"
   end
@@ -69,16 +70,16 @@ local function get_play_time()
   return string.format("%d:%02d:%02d", h, m, s)
 end
 
-local function generate_session()
+local function generate_player_info()
   local play_time, error = get_play_time()
   if play_time == nil then return nil, error end
 
-  local header = "[" .. get_os_time() .. "] Pos=" .. play_time .. ", Idx=" .. get_playlist_idx()
-  local lines = {header}
+  local header = "[" .. get_datetime() .. "] Pos=" .. play_time .. ", Idx=" .. get_playlist_idx()
+  local lines = { header }
 
   local paths = get_playlist_paths()
   -- add 2 spaces in front of each path
-  for i=1,#paths do
+  for i = 1, #paths do
     lines[#lines + 1] = "  " .. paths[i]
   end
 
@@ -86,14 +87,12 @@ local function generate_session()
   return session
 end
 
-
 local function save_session()
-  local session = generate_session()
+  local session = generate_player_info()
   local path = get_session_path()
 
   write_to_path(path, session)
   mp.osd_message("Saved video session to: " .. path)
-  -- mp.osd_message(table.concat(get_playlist_paths(), '|'))
 end
 
 mp.register_script_message("save-session", save_session)
