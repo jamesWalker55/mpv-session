@@ -1,5 +1,7 @@
 # mpv-session
 
+![](doc/demo.gif)
+
 This lets you save videos into a session, then load them back later.
 
 When you have multiple MPV players open and you want to "bookmark" them, you can save them into a session then load it back in the future.
